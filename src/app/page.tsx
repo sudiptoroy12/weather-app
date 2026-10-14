@@ -12,6 +12,7 @@ import DailyForecast from "@/components/DailyForecast";
 
 import { getWeather, searchCities } from "@/lib/weather";
 import type { City, WeatherData } from "@/lib/weather";
+import AboutSection from "@/components/AboutSection";
 
 export default function Home() {
   const [city, setCity] = useState<City>({
@@ -77,7 +78,7 @@ export default function Home() {
 
             <div>
               <h1 className="text-2xl font-bold tracking-tight text-white">
-                Atmos<span className="text-cyan-300">.</span>
+                Weather App<span className="text-cyan-300">.</span>
               </h1>
               <p className="text-xs text-slate-400">
                 Your daily weather companion
@@ -162,17 +163,9 @@ export default function Home() {
 
             <DailyForecast weather={weather} />
 
-            <footer className="border-t border-slate-800 pt-5 text-center text-xs text-slate-500">
-              Weather data provided by{" "}
-              <a
-                href="https://open-meteo.com/"
-                target="_blank"
-                rel="noreferrer"
-                className="text-cyan-400 underline underline-offset-4 hover:text-cyan-300"
-              >
-                Open-Meteo
-              </a>
-            </footer>
+            <AboutSection/>
+
+       
           </div>
         )}
       </div>

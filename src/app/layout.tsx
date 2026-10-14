@@ -1,9 +1,10 @@
 
 import type { Metadata } from "next";
 import "./globals.css";
+import Footer from "@/components/Footer";
 
 export const metadata: Metadata = {
-  title: "Atmos Weather | Live Weather & Forecasts",
+  title: "Weather App | Live Weather & Forecasts",
   description:
     "Check current weather, hourly conditions, and a 7-day forecast for cities around the world.",
 };
@@ -15,7 +16,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body>{children}</body>
+
+      <body>
+
+        <main>{children}</main>
+        <Footer/>
+        
+        </body>
     </html>
   );
 }
