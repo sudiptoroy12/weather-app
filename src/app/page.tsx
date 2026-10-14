@@ -14,6 +14,7 @@ import { getWeather, searchCities } from "@/lib/weather";
 import type { City, WeatherData } from "@/lib/weather";
 import AboutSection from "@/components/AboutSection";
 
+
 export default function Home() {
   const [city, setCity] = useState<City>({
     id: 1185241,
@@ -91,6 +92,7 @@ export default function Home() {
             onSelect={handleSelect}
             loading={searchLoading}
           />
+       
         </header>
 
         <div className="mb-8">
