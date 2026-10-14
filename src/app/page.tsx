@@ -1,69 +1,181 @@
-import Image from "next/image";
+
+"use client";
+
+import { useCallback, useEffect, useState } from "react";
+import { CloudSun, RefreshCw, AlertCircle } from "lucide-react";
+
+import SearchBar from "@/components/SearchBar";
+import CurrentWeather from "@/components/CurrentWeather";
+import WeatherDetails from "@/components/WeatherDetails";
+import HourlyForecast from "@/components/HourlyForecast";
+import DailyForecast from "@/components/DailyForecast";
+
+import { getWeather, searchCities } from "@/lib/weather";
+import type { City, WeatherData } from "@/lib/weather";
 
 export default function Home() {
+  const [city, setCity] = useState<City>({
+    id: 1185241,
+    name: "Dhaka",
+    latitude: 23.7104,
+    longitude: 90.4074,
+    country: "Bangladesh",
+    timezone: "Asia/Dhaka",
+  });
+
+  const [weather, setWeather] = useState<WeatherData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [searchLoading, setSearchLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const loadWeather = useCallback(async (selectedCity: City) => {
+    setLoading(true);
+    setError("");
+
+    try {
+      const data = await getWeather(
+        selectedCity.latitude,
+        selectedCity.longitude,
+      );
+
+      setWeather(data);
+    } catch {
+      setError(
+        "We couldn't load the weather. Check your internet connection and try again.",
+      );
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void loadWeather(city);
+  }, [city, loadWeather]);
+
+  async function handleSearch(query: string): Promise<City[]> {
+    setSearchLoading(true);
+
+    try {
+      return await searchCities(query);
+    } finally {
+      setSearchLoading(false);
+    }
+  }
+
+  function handleSelect(selectedCity: City) {
+    setCity(selectedCity);
+  }
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+    <main className="min-h-screen bg-[#080F1D] text-slate-100">
+      <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-10 lg:px-8">
+        <header className="mb-10 flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-3">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-cyan-300/20 bg-cyan-300/10">
+              <CloudSun className="h-7 w-7 text-cyan-300" />
+            </div>
+
+            <div>
+              <h1 className="text-2xl font-bold tracking-tight text-white">
+                Atmos<span className="text-cyan-300">.</span>
+              </h1>
+              <p className="text-xs text-slate-400">
+                Your daily weather companion
+              </p>
+            </div>
+          </div>
+
+          <SearchBar
+            onSearch={handleSearch}
+            onSelect={handleSelect}
+            loading={searchLoading}
+          />
+        </header>
+
+        <div className="mb-8">
+          <p className="text-sm font-medium uppercase tracking-[0.2em] text-cyan-400">
+            Weather overview
+          </p>
+          <h2 className="mt-2 text-2xl font-semibold text-white sm:text-3xl">
+            Stay ahead of the weather.
+          </h2>
+          <p className="mt-2 text-sm text-slate-400">
+            Live conditions and forecasts for your selected city.
           </p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+
+        {loading && (
+          <div
+            role="status"
+            aria-live="polite"
+            className="space-y-5"
           >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+            <p className="text-sm text-cyan-300">
+              Loading weather for {city.name}...
+            </p>
+
+            <div className="h-72 animate-pulse rounded-3xl border border-slate-800 bg-slate-900" />
+
+            <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+              {Array.from({ length: 4 }, (_, i) => (
+                <div
+                  key={i}
+                  className="h-28 animate-pulse rounded-2xl bg-slate-900"
+                />
+              ))}
+            </div>
+
+            <div className="h-48 animate-pulse rounded-3xl bg-slate-900" />
+          </div>
+        )}
+
+        {!loading && error && (
+          <div
+            role="alert"
+            className="rounded-3xl border border-rose-500/20 bg-rose-500/5 p-8 text-center"
           >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+            <AlertCircle className="mx-auto h-10 w-10 text-rose-400" />
+            <h3 className="mt-4 text-lg font-semibold text-white">
+              Something went wrong
+            </h3>
+            <p className="mx-auto mt-2 max-w-md text-sm text-slate-400">
+              {error}
+            </p>
+
+            <button
+              onClick={() => void loadWeather(city)}
+              className="mt-5 inline-flex items-center gap-2 rounded-xl bg-cyan-400 px-5 py-3 font-semibold text-slate-950 transition hover:bg-cyan-300"
+            >
+              <RefreshCw className="h-4 w-4" />
+              Try again
+            </button>
+          </div>
+        )}
+
+        {!loading && !error && weather && (
+          <div className="space-y-5">
+            <CurrentWeather city={city} weather={weather} />
+
+            <WeatherDetails weather={weather} />
+
+            <HourlyForecast weather={weather} />
+
+            <DailyForecast weather={weather} />
+
+            <footer className="border-t border-slate-800 pt-5 text-center text-xs text-slate-500">
+              Weather data provided by{" "}
+              <a
+                href="https://open-meteo.com/"
+                target="_blank"
+                rel="noreferrer"
+                className="text-cyan-400 underline underline-offset-4 hover:text-cyan-300"
+              >
+                Open-Meteo
+              </a>
+            </footer>
+          </div>
+        )}
+      </div>
+    </main>
   );
 }
